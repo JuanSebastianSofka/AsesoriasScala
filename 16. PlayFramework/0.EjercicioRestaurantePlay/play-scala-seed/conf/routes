@@ -12,4 +12,8 @@ GET /api/reservas/:id   reservas.infraestructura.controladores.ControladorReserv
 #luego vamos a la terminal, escribimos sbt compile y luego sbt run, si pide usar el servidor por defecto damos yes
 #luegpos podemos ir a postam y probar el código. De momento me lanza pero lo tumba a la vez
 
+POST /api/reservas/   reservas.infraestructura.controladores.ControladorReserva.crearReserva
+#pasamos ya con json en postman el crear un post de reserva
+
+
 

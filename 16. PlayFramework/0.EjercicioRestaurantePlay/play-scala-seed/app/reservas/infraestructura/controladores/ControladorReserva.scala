@@ -2,11 +2,12 @@ package reservas.infraestructura.controladores
 
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, ControllerComponents}
-import reservas.dominio.servicios.ObtenerReservas
+import reservas.dominio.servicios.{ObtenerReservas, ProcesarReserva}
 import reservas.infraestructura.controladores.DTO.ReservaDTO
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 //las clases deben ser singleton, y debemos extender de base controller. AL extener de este debemos a la clase asignar una variable de tipo
 //ControllerCOmponents. Se usa para poder tener un buen uso a los servivcios
@@ -54,5 +55,25 @@ class ControladorReserva @Inject()(val controllerComponents: ControllerComponent
         }).getOrElse(NotFound("No existe la reserva"))
 
       }) //añadimos el implicito global
+  }
+
+  //solo aceptamos json con el parse.json
+  def crearReserva(id: String) = Action.async(parse.json){
+    request =>
+      //valido que el request tenga estructura json de reserva dto
+      val validar = request.body.validate[ReservaDTO]
+
+      validar.asEither match{
+        case Left(value) => Future.successful(BadRequest(value.toString()))
+
+        case Right(value) => ProcesarReserva.crearReserva(value) //aqui hay un error porque necesitamos el implicito que pase de dtp a dominio
+          //en el package
+        .map(reserva =>{
+          val reservaDTO: ReservaDTO = reserva
+          val json = Json.toJson(reservaDTO)
+          Ok(json)
+        })
+      }
+
   }
 }
