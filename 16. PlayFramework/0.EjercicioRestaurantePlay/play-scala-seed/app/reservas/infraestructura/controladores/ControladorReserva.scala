@@ -5,13 +5,15 @@ import play.api.mvc.{BaseController, ControllerComponents}
 import reservas.dominio.servicios.ObtenerReservas
 import reservas.infraestructura.controladores.DTO.ReservaDTO
 
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 //las clases deben ser singleton, y debemos extender de base controller. AL extener de este debemos a la clase asignar una variable de tipo
 //ControllerCOmponents. Se usa para poder tener un buen uso a los servivcios
+
+//añadimos el inject para la injeccion de dependencias
 @Singleton
-class ControladorReserva(val controllerComponents: ControllerComponents) extends BaseController{
+class ControladorReserva @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
 
   //se usan los Action porque el BaseControler lo usa para saber que recibe y que devuelve
   //usamos async de asuncrono, y espera que le pasemos un futuro
@@ -25,7 +27,7 @@ class ControladorReserva(val controllerComponents: ControllerComponents) extends
         Ok("") //ok es http 200, y recibe strings, y de momento enviamos "", pero la idea es enviar la reserva serializada, usando el package
       }) //añadimos el implicito global*/
 
-    ObtenerReservas.obtenerReserva(id)
+    /*ObtenerReservas.obtenerReserva(id)
       .map(reserva => {
         val reservaDto: ReservaDTO = reserva
 
@@ -35,6 +37,22 @@ class ControladorReserva(val controllerComponents: ControllerComponents) extends
 
         val json = Json.toJson(reservaDto) //importamos el json de play.api
         Ok(json) //ok es http 200, enviamos el json serializado
+      }) //añadimos el implicito global*/
+
+    //para el nuevo commit con el some y none
+    ObtenerReservas.obtenerReserva(id)
+      .map(reservaOpt => {
+        reservaOpt.map(reserva => {
+          val reservaDto: ReservaDTO = reserva
+
+          //val json = Json.obj("data"-> reservaDto) //importamos el json de play.api
+
+          //otra forma de json, las dos, esta y la anterior funcionan
+
+          val json = Json.toJson(reservaDto) //importamos el json de play.api
+          Ok(json) //ok es http 200, enviamos el json serializado
+        }).getOrElse(NotFound("No existe la reserva"))
+
       }) //añadimos el implicito global
   }
 }

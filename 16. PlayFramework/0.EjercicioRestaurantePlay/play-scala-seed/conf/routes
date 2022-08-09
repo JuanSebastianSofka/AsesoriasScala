@@ -4,3 +4,12 @@
 # ~~~~
 
 #borramos lo que habia para ajustarlo a lo nuestro
+
+#para probar nuestro controlador. La ruta sale del archivo ControladorReserva en el package, y añadimos los puntos para obtener el metodo
+
+GET /api/reservas/:id   reservas.infraestructura.controladores.ControladorReserva.obtenerReserva(id: String)
+
+#luego vamos a la terminal, escribimos sbt compile y luego sbt run, si pide usar el servidor por defecto damos yes
+#luegpos podemos ir a postam y probar el código. De momento me lanza pero lo tumba a la vez
+
+

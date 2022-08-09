@@ -8,8 +8,13 @@ import scala.concurrent.Future
 
 trait ObtenerReservas {
 
-  def obtenerReserva(id: String) : Future[Reserva] = Future {
-    Reserva("123", "Juan", new Date().toString, Reservado())
+  def obtenerReserva(id: String) : Future[Option[Reserva]] = Future {
+    if(id == "123"){
+      Some(Reserva("123", "Juan", new Date().toString, Reservado()))
+    }else{
+      None
+    }
+
   } //importamos el implicito globak
 
 }
