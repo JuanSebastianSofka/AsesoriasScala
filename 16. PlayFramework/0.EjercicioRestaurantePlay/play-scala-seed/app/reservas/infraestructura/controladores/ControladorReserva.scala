@@ -1,5 +1,6 @@
 package reservas.infraestructura.controladores
 
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, ControllerComponents}
 import reservas.dominio.servicios.{ObtenerReservas, ProcesarReserva}
@@ -15,7 +16,7 @@ import scala.concurrent.Future
 //añadimos el inject para la injeccion de dependencias
 @Singleton
 class ControladorReserva @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
-
+  val logger: Logger = Logger("ControladorReserva")
   //se usan los Action porque el BaseControler lo usa para saber que recibe y que devuelve
   //usamos async de asuncrono, y espera que le pasemos un futuro
   //este async debe deolver una construccion de la accion que se traduce a http usando map
@@ -54,26 +55,36 @@ class ControladorReserva @Inject()(val controllerComponents: ControllerComponent
           Ok(json) //ok es http 200, enviamos el json serializado
         }).getOrElse(NotFound("No existe la reserva"))
 
-      }) //añadimos el implicito global
+      }).recover {
+      case ex =>
+        logger.error("Ocurrio un error en el servicio obtenerReserva", ex)
+        InternalServerError("Ocurrio un error interno")
+    } //añadimos el implicito global
   }
 
   //solo aceptamos json con el parse.json
-  def crearReserva(id: String) = Action.async(parse.json){
+  def crearReserva() = Action.async(parse.json) {
     request =>
       //valido que el request tenga estructura json de reserva dto
       val validar = request.body.validate[ReservaDTO]
 
-      validar.asEither match{
+      validar.asEither match {
         case Left(value) => Future.successful(BadRequest(value.toString()))
 
         case Right(value) => ProcesarReserva.crearReserva(value) //aqui hay un error porque necesitamos el implicito que pase de dtp a dominio
           //en el package
-        .map(reserva =>{
-          val reservaDTO: ReservaDTO = reserva
-          val json = Json.toJson(reservaDTO)
-          Ok(json)
-        })
+          .map(reserva => {
+            val reservaDTO: ReservaDTO = reserva
+            val json = Json.toJson(reservaDTO)
+            Ok(json)
+          }).recover {
+          case ex =>
+            logger.error("Ocurrio un error en el servicio obtenerReserva", ex)
+            InternalServerError("Ocurrio un error interno")
+        } //añadimos el implicito global
       }
-
   }
+
+  //put es igual a crear
+  //delete es igual aobtener solo que con el metodo de eliminar
 }
