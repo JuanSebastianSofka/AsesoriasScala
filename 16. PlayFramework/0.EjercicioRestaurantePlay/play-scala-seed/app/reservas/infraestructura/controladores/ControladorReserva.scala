@@ -3,7 +3,7 @@ package reservas.infraestructura.controladores
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, ControllerComponents}
-import reservas.dominio.servicios.{ObtenerReservas, ProcesarReserva}
+import reservas.dominio.servicios.{EliminarReserva, ObtenerReservas, ProcesarReserva}
 import reservas.infraestructura.controladores.DTO.ReservaDTO
 
 import javax.inject.{Inject, Singleton}
@@ -86,5 +86,20 @@ class ControladorReserva @Inject()(val controllerComponents: ControllerComponent
   }
 
   //put es igual a crear
-  //delete es igual aobtener solo que con el metodo de eliminar
+  //delete es igual a obtener solo que con el metodo de eliminar
+
+  def eliminarReserva(id: String) = Action.async {
+
+    EliminarReserva.eliminarReserva(id)
+      .map(reserva => {
+        val reservaDto: ReservaDTO = reserva
+        val json = Json.toJson(reservaDto) //importamos el json de play.api
+        Ok(json) //ok es http 200, enviamos el json serializado
+
+      }).recover {
+      case ex =>
+        logger.error("Ocurrio un error en el servicio obtenerReserva", ex)
+        InternalServerError("Ocurrio un error interno")
+    } //añadimos el implicito global
+  }
 }
