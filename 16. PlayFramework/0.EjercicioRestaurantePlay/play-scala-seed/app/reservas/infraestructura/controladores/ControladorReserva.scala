@@ -15,7 +15,7 @@ import scala.concurrent.Future
 
 //añadimos el inject para la injeccion de dependencias
 @Singleton
-class ControladorReserva @Inject()(val controllerComponents: ControllerComponents) extends BaseController {
+class ControladorReserva @Inject() (val controllerComponents: ControllerComponents) extends BaseController {
   val logger: Logger = Logger("ControladorReserva")
   //se usan los Action porque el BaseControler lo usa para saber que recibe y que devuelve
   //usamos async de asuncrono, y espera que le pasemos un futuro
